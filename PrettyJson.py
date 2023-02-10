@@ -420,8 +420,8 @@ class JqPrettyJsonCommand(sublime_plugin.TextCommand):
             "set_layout",
             {
                 "cols": [0.0, 0.5, 1.0],
-                "rows": [0.0, 1.0],
-                "cells": [[0, 0, 1, 1], [1, 0, 2, 1]],
+                "rows": [0.0, 0.8480533392434988, 1.0],
+                "cells": [[0, 0, 1, 2], [1, 0, 2, 1], [1, 1, 2, 2]],
             },
         )
 
@@ -439,6 +439,16 @@ class JqPrettyJsonCommand(sublime_plugin.TextCommand):
         jq_view.set_read_only(True)
         jq_view.set_scratch(True)
         jq_view.sel().clear()
+
+        preview_window.focus_group(2)
+        query_view = preview_window.new_file()
+        query_view.settings().set("pretty-json-jq-query-window-id", self.view.window().id())
+        query_view.settings().set("pretty-json-jq-path", get_jq_path())
+        query_view.settings().set("line_numbers", False)
+        query_view.settings().set("gutter", False)
+        query_view.set_scratch(True)
+        query_view.set_name("Query")
+        query_view.run_command("insert", {"characters": "."})
 
         jq_view.set_syntax_file(syntax_file)
         preview_view.set_syntax_file(syntax_file)
@@ -470,13 +480,6 @@ class JqQueryPrettyJson(sublime_plugin.WindowCommand):
         if jq_path:
             preview_view = self.window.active_view()
             preview_view.run_command("jq_pretty_json")
-            sublime.active_window().show_input_panel(
-                "Enter ./jq filter expression",
-                ".",
-                self.done,
-                functools.partial(self.send_query, jq_path),
-                None,
-            )
         else:
             if sublime.ok_cancel_dialog(
                     "./jq tool is not available on your system. Do you want to open the jq website?",
@@ -484,6 +487,10 @@ class JqQueryPrettyJson(sublime_plugin.WindowCommand):
                 ):
                 webbrowser.open("http://stedolan.github.io/jq")
 
+
+class JqQueryUpdate(sublime_plugin.WindowCommand):
+    def run(self, jq_path: str, query: str):
+        self.send_query(jq_path, query)
 
     def get_content(self):
         """returns content of active view or selected region"""
