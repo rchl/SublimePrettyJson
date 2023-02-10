@@ -1,6 +1,5 @@
 import decimal
 import os
-import functools
 import re
 import subprocess
 import shutil
@@ -68,7 +67,6 @@ class PrettyJsonBaseCommand:
         if settings.get("keep_arrays_single_line", False):
             matches = re.findall(r"(\[[^\[\]]+?\])", output_json)
             matches.sort(key=len, reverse=True)
-            join_separator = line_separator.ljust(2)
             for m in matches:
                 content = m[1:-1].strip()
                 items = [a.strip() for a in content.split(os.linesep)]
@@ -78,7 +76,7 @@ class PrettyJsonBaseCommand:
                     if item in ('{', '}') or item.endswith("{") or item.startswith("}"):
                         replacement = replacement + item
                         if item == '}':
-                            if index != len(items)-1 and items[index+1] != "}":
+                            if index != len(items) - 1 and items[index + 1] != "}":
                                 replacement = replacement + ','
                     else:
                         replacement = replacement + item
@@ -127,9 +125,7 @@ class PrettyJsonBaseCommand:
             space_number = text_before_sel.size()
             indent_space = " " * space_number
         elif reindent_mode == "minimal":
-            indent_space = re.search(r"^\s*", self.view.substr(text_before_sel)).group(
-                0
-            )
+            indent_space = re.search(r"^\s*", self.view.substr(text_before_sel)).group(0)
 
         lines = text.split("\n")
 
@@ -198,9 +194,7 @@ class PrettyJsonBaseCommand:
 
     def syntax_to_json(self):
         settings = sublime.load_settings("Pretty JSON.sublime-settings")
-        syntax = os.path.splitext(os.path.basename(self.view.settings().get("syntax")))[
-            0
-        ]
+        syntax = os.path.splitext(os.path.basename(self.view.settings().get("syntax")))[0]
         as_json = [i.lower() for i in settings.get("as_json", ["JSON"])]
         if syntax.lower() not in as_json and settings.get("set_syntax_on_format", True):
             self.view.set_syntax_file(json_syntax)
