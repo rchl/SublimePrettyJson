@@ -443,9 +443,19 @@ class JqPrettyJsonCommand(sublime_plugin.TextCommand):
         query_view.set_scratch(True)
         query_view.set_name("Query")
         query_view.run_command("insert", {"characters": "."})
+        query_view.run_command('jq_decorate_prompt')
 
         jq_view.set_syntax_file(syntax_file)
-        preview_view.set_syntax_file(syntax_file)
+        # preview_view.set_syntax_file(syntax_file)
+
+
+class JqDecoratePromptCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        self.view.add_regions(
+            'jq-prompt',
+            [sublime.Region(0)],
+            annotations=['<a href="https://stedolan.github.io/jq/manual/">jq Documentation</a>']
+        )
 
 
 class JqQueryPrettyJson(sublime_plugin.WindowCommand):
